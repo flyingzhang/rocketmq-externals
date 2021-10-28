@@ -24,7 +24,7 @@ public class MsgPropertyKeyConstant {
     public final static String MSG_QOS_LEVEL = "qosLevel";
     // isRetain
     public final static String MSG_IS_RETAIN = "isRetain";
-    // isRetain
+    // remainingLength
     public final static String MSG_REMAINING_LENGTH = "remainingLength";
     // packetId
     public final static String MSG_PACKET_ID = "packetId";

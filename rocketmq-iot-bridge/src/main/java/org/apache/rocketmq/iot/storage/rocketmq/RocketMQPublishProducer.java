@@ -35,9 +35,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class RocketMQPublishProducer implements PublishProducer {
-    private Logger logger = LoggerFactory.getLogger(RocketMQPublishProducer.class);
+    private final Logger logger = LoggerFactory.getLogger(RocketMQPublishProducer.class);
 
-    private MqttBridgeConfig bridgeConfig;
+    private final MqttBridgeConfig bridgeConfig;
     private DefaultMQProducer producer;
 
     public RocketMQPublishProducer(MqttBridgeConfig bridgeConfig) {
@@ -46,12 +46,16 @@ public class RocketMQPublishProducer implements PublishProducer {
     }
 
     private void initMQProducer() {
-        SessionCredentials sessionCredentials = new SessionCredentials(bridgeConfig.getRmqAccessKey(),
-            bridgeConfig.getRmqSecretKey());
-        RPCHook rpcHook = new AclClientRPCHook(sessionCredentials);
+        RPCHook rpcHook = null;
+        if (bridgeConfig.isRmqCredentialValid()) {
+            SessionCredentials sessionCredentials = new SessionCredentials(bridgeConfig.getRmqAccessKey(),
+                bridgeConfig.getRmqSecretKey());
+            rpcHook = new AclClientRPCHook(sessionCredentials);
+        }
 
         this.producer = new DefaultMQProducer(bridgeConfig.getRmqProductGroup(), rpcHook);
         this.producer.setNamesrvAddr(bridgeConfig.getRmqNamesrvAddr());
+        this.producer.setSendMsgTimeout(bridgeConfig.getRmqSendTimeout());
     }
 
     @Override public void start() throws MQClientException {

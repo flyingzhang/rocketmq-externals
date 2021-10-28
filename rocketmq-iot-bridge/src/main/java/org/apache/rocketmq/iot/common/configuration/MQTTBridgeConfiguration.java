@@ -59,6 +59,9 @@ public class MQTTBridgeConfiguration {
     public static final String MQTT_ROCKETMQ_SECRETKEY = "iot.mqtt.server.rocketmq.secretkey";
     public static final String MQTT_ROCKETMQ_SECRETKEY_DEFAULT = "";
 
+    public static final String MQTT_ROCKETMQ_SENDTIMEOUT = "iot.mqtt.server.rocketmq.producer.sendtimeout";
+    public static final String MQTT_ROCKETMQ_SENDTIMEOUT_DEFAULT = "10000";
+
     public static final String MQTT_ROCKETMQ_NAMESRVADDR = "iot.mqtt.server.rocketmq.namesrvaddr";
     public static final String MQTT_ROCKETMQ_NAMESRVADDR_DEFAULT = "";
 
@@ -70,4 +73,5 @@ public class MQTTBridgeConfiguration {
 
     public static final String MQTT_ROKECTMQ_CONSUMER_PULL_NUMS = "iot.mqtt.server.rocketmq.consumer.pull.nums";
     public static final String MQTT_ROKECTMQ_CONSUMER_PULL_NUMS_DEFAULT = "32";
+
 }

@@ -27,6 +27,8 @@ import org.eclipse.paho.client.mqttv3.persist.MemoryPersistence;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.nio.charset.Charset;
+
 public class MqttSampleConsumer {
 
     private static Logger log = LoggerFactory.getLogger(MqttSampleConsumer.class);
@@ -53,6 +55,8 @@ public class MqttSampleConsumer {
                     }
 
                     @Override public void messageArrived(String s, MqttMessage message) throws Exception {
+                        log.info("message received: qos: {}, payload: [{}]", message.getQos(),
+                            new String(message.getPayload(), Charset.forName("UTF-8")));
                         System.exit(0);
                     }
 

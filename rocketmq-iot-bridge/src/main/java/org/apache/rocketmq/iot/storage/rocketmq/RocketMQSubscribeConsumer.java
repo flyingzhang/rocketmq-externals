@@ -55,9 +55,11 @@ public class RocketMQSubscribeConsumer implements SubscribeConsumer {
         this.bridgeConfig = bridgeConfig;
         this.subscriptionStore = subscriptionStore;
         this.taskExecutor = Executors.newCachedThreadPool();
-        SessionCredentials sessionCredentials = new SessionCredentials(bridgeConfig.getRmqAccessKey(),
+        if (bridgeConfig.isRmqCredentialValid()) {
+            SessionCredentials sessionCredentials = new SessionCredentials(bridgeConfig.getRmqAccessKey(),
                 bridgeConfig.getRmqSecretKey());
-        this.rpcHook = new AclClientRPCHook(sessionCredentials);
+            this.rpcHook = new AclClientRPCHook(sessionCredentials);
+        }
     }
 
     @Override

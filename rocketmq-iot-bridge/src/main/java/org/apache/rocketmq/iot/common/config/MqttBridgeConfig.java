@@ -44,6 +44,7 @@ public class MqttBridgeConfig {
     private int rmqConsumerPullNums;
     private String rmqAccessKey;
     private String rmqSecretKey;
+    private int rmqSendTimeout;
 
     public MqttBridgeConfig() {
         initConfig();
@@ -79,6 +80,8 @@ public class MqttBridgeConfig {
 
             this.rmqAccessKey = System.getProperty(MQTT_ROCKETMQ_ACCESSKEY, MQTT_ROCKETMQ_ACCESSKEY_DEFAULT);
             this.rmqSecretKey = System.getProperty(MQTT_ROCKETMQ_SECRETKEY, MQTT_ROCKETMQ_SECRETKEY_DEFAULT);
+            this.rmqSendTimeout = Integer.parseInt(System.getProperty(MQTT_ROCKETMQ_SENDTIMEOUT,
+                MQTT_ROCKETMQ_SENDTIMEOUT_DEFAULT));
         }
 
     }
@@ -127,6 +130,11 @@ public class MqttBridgeConfig {
         return rmqSecretKey;
     }
 
+    public boolean isRmqCredentialValid() {
+        return rmqAccessKey != null && !rmqAccessKey.isEmpty()
+            && rmqSecretKey != null && !rmqSecretKey.isEmpty();
+    }
+
     public String getRmqNamesrvAddr() {
         return rmqNamesrvAddr;
     }
@@ -142,6 +150,11 @@ public class MqttBridgeConfig {
     public int getRmqConsumerPullNums() {
         return rmqConsumerPullNums;
     }
+
+    public int getRmqSendTimeout() {
+        return rmqSendTimeout;
+    }
+
 
     @Override public String toString() {
         return "MqttBridgeConfig{" +
@@ -162,4 +175,5 @@ public class MqttBridgeConfig {
             ", rmqSecretKey='" + rmqSecretKey + '\'' +
             '}';
     }
+
 }
