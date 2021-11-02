@@ -47,40 +47,43 @@ public class MqttBridgeConfig {
     private int rmqSendTimeout;
 
     public MqttBridgeConfig() {
-        initConfig();
+        initConfig(System.getProperties());
     }
 
     public MqttBridgeConfig(Properties properties) {
-        this.properties = properties;
+        Properties comboProperties = new Properties(System.getProperties());
+        comboProperties.putAll(properties);
+        this.properties = comboProperties;
+        initConfig(this.properties);
     }
 
-    public void initConfig() {
-        this.brokerHost = System.getProperty(MQTT_BROKER_HOST, MQTT_BROKER_HOST_DEFAULT);
-        this.brokerPort = Integer.parseInt(System.getProperty(MQTT_BROKER_PORT, MQTT_BROKER_PORT_DEFAULT));
-        this.httpPort = Integer.parseInt(System.getProperty(MQTT_HTTP_PORT, MQTT_HTTP_PORT_DEFAULT));
-        this.httpClusterHostList = Arrays.asList(System.getProperty(MQTT_HTTP_CLUSTER_HOST_LIST, MQTT_HTTP_CLUSTER_HOST_LIST_DEFAULT)
+    private void initConfig(Properties properties) {
+        this.brokerHost = properties.getProperty(MQTT_BROKER_HOST, MQTT_BROKER_HOST_DEFAULT);
+        this.brokerPort = Integer.parseInt(properties.getProperty(MQTT_BROKER_PORT, MQTT_BROKER_PORT_DEFAULT));
+        this.httpPort = Integer.parseInt(properties.getProperty(MQTT_HTTP_PORT, MQTT_HTTP_PORT_DEFAULT));
+        this.httpClusterHostList = Arrays.asList(properties.getProperty(MQTT_HTTP_CLUSTER_HOST_LIST, MQTT_HTTP_CLUSTER_HOST_LIST_DEFAULT)
                 .split(MqttConstant.HTTP_ADDRESS_SEPARATOR));
 
-        this.bossGroupThreadNum = Integer.parseInt(System.getProperty(MQTT_SERVER_BOSS_GROUP_THREAD_NUM,
+        this.bossGroupThreadNum = Integer.parseInt(properties.getProperty(MQTT_SERVER_BOSS_GROUP_THREAD_NUM,
             MQTT_SERVER_BOSS_GROUP_THREAD_NUM_DEFAULT));
-        this.workerGroupThreadNum = Integer.parseInt(System.getProperty(MQTT_SERVER_WORKER_GROUP_THREAD_NUM,
+        this.workerGroupThreadNum = Integer.parseInt(properties.getProperty(MQTT_SERVER_WORKER_GROUP_THREAD_NUM,
             MQTT_SERVER_WORKER_GROUP_THREAD_NUM_DEFAULT));
-        this.socketBacklogSize = Integer.parseInt(System.getProperty(MQTT_SERVER_SOCKET_BACKLOG_SIZE,
+        this.socketBacklogSize = Integer.parseInt(properties.getProperty(MQTT_SERVER_SOCKET_BACKLOG_SIZE,
             MQTT_SERVER_SOCKET_BACKLOG_SIZE_DEFAULT));
-        this.heartbeatAllidleTime = Long.parseLong(System.getProperty(MQTT_BROKER_HEARTBEAT_ALLIDLETIME,
+        this.heartbeatAllidleTime = Long.parseLong(properties.getProperty(MQTT_BROKER_HEARTBEAT_ALLIDLETIME,
                 MQTT_BROKER_HEARTBEAT_ALLIDLETIME_DEFAULT));
 
-        this.enableRocketMQStore =  Boolean.parseBoolean(System.getProperty(MQTT_ROCKETMQ_STORE_ENABLED, MQTT_ROCKETMQ_STORE_ENABLED_DEFAULT));
+        this.enableRocketMQStore =  Boolean.parseBoolean(properties.getProperty(MQTT_ROCKETMQ_STORE_ENABLED, MQTT_ROCKETMQ_STORE_ENABLED_DEFAULT));
         if (enableRocketMQStore) {
-            this.rmqNamesrvAddr = System.getProperty(MQTT_ROCKETMQ_NAMESRVADDR, MQTT_ROCKETMQ_NAMESRVADDR_DEFAULT);
-            this.rmqProductGroup = System.getProperty(MQTT_ROCKETMQ_PRODUCER_GROUP, MQTT_ROCKETMQ_PRODUCER_GROUP_DEFAULT);
-            this.rmqConsumerGroup = System.getProperty(MQTT_ROCKETMQ_CONSUMER_GROUP, MQTT_ROCKETMQ_CONSUMER_GROUP_DEFAULT);
-            this.rmqConsumerPullNums = Integer.parseInt(System.getProperty(MQTT_ROKECTMQ_CONSUMER_PULL_NUMS,
+            this.rmqNamesrvAddr = properties.getProperty(MQTT_ROCKETMQ_NAMESRVADDR, MQTT_ROCKETMQ_NAMESRVADDR_DEFAULT);
+            this.rmqProductGroup = properties.getProperty(MQTT_ROCKETMQ_PRODUCER_GROUP, MQTT_ROCKETMQ_PRODUCER_GROUP_DEFAULT);
+            this.rmqConsumerGroup = properties.getProperty(MQTT_ROCKETMQ_CONSUMER_GROUP, MQTT_ROCKETMQ_CONSUMER_GROUP_DEFAULT);
+            this.rmqConsumerPullNums = Integer.parseInt(properties.getProperty(MQTT_ROKECTMQ_CONSUMER_PULL_NUMS,
                     MQTT_ROKECTMQ_CONSUMER_PULL_NUMS_DEFAULT));
 
-            this.rmqAccessKey = System.getProperty(MQTT_ROCKETMQ_ACCESSKEY, MQTT_ROCKETMQ_ACCESSKEY_DEFAULT);
-            this.rmqSecretKey = System.getProperty(MQTT_ROCKETMQ_SECRETKEY, MQTT_ROCKETMQ_SECRETKEY_DEFAULT);
-            this.rmqSendTimeout = Integer.parseInt(System.getProperty(MQTT_ROCKETMQ_SENDTIMEOUT,
+            this.rmqAccessKey = properties.getProperty(MQTT_ROCKETMQ_ACCESSKEY, MQTT_ROCKETMQ_ACCESSKEY_DEFAULT);
+            this.rmqSecretKey = properties.getProperty(MQTT_ROCKETMQ_SECRETKEY, MQTT_ROCKETMQ_SECRETKEY_DEFAULT);
+            this.rmqSendTimeout = Integer.parseInt(properties.getProperty(MQTT_ROCKETMQ_SENDTIMEOUT,
                 MQTT_ROCKETMQ_SENDTIMEOUT_DEFAULT));
         }
 

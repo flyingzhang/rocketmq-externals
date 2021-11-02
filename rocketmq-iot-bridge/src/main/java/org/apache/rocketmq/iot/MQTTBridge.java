@@ -54,6 +54,8 @@ import org.apache.rocketmq.iot.storage.subscription.impl.InMemorySubscriptionSto
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 
 public class MQTTBridge {
@@ -79,7 +81,13 @@ public class MQTTBridge {
     }
 
     private void  init() {
-        this.bridgeConfig = new MqttBridgeConfig();
+        try {
+            Properties properties = new Properties();
+            properties.load(MQTTBridge.class.getResourceAsStream("application.properties"));
+            this.bridgeConfig = new MqttBridgeConfig(properties);
+        } catch (IOException ioe) {
+            this.bridgeConfig = new MqttBridgeConfig();
+        }
 
         subscriptionStore = new InMemorySubscriptionStore();
         if (bridgeConfig.isEnableRocketMQStore()) {
@@ -138,7 +146,7 @@ public class MQTTBridge {
     }
 
     public void start() {
-        logger.info("start the MQTTServer with config " + bridgeConfig);
+        logger.info(String.format("start the MQTTServer with config %s", bridgeConfig));
         try {
             if (bridgeConfig.isEnableRocketMQStore()) {
                 publishProducer.start();
@@ -148,7 +156,7 @@ public class MQTTBridge {
             ChannelFuture channelFuture = serverBootstrap.bind().sync();
             channelFuture.channel().closeFuture().sync();
         } catch (Exception e) {
-            logger.error("fail to start the MQTTServer." + e);
+            logger.error("fail to start the MQTTServer.", e);
         } finally {
             logger.info("shutdown the MQTTServer");
             shutdown();
