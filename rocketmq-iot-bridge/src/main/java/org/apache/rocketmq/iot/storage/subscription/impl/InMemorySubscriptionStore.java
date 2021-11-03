@@ -112,7 +112,6 @@ public class InMemorySubscriptionStore implements SubscriptionStore {
                     .forEach(t -> append(t, subscription)
                     );
             }
-
         }
     }
 

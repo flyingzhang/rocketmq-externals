@@ -20,6 +20,7 @@ package org.apache.rocketmq.iot.rest.common;
 public class Connection {
     private String clientId;
     private String rmqTopic;
+    private String rmqSelector;
     private String mqttTopic;
     private String hostName;
     private String ip;
@@ -41,6 +42,7 @@ public class Connection {
     public void setRmqTopic(String rmqTopic) {
         this.rmqTopic = rmqTopic;
     }
+
 
     public String getMqttTopic() {
         return mqttTopic;
@@ -80,5 +82,13 @@ public class Connection {
 
     public void setNum(int num) {
         this.num = num;
+    }
+
+    public String getRmqSelector() {
+        return rmqSelector;
+    }
+
+    public void setRmqSelector(String rmqSelector) {
+        this.rmqSelector = rmqSelector;
     }
 }

@@ -24,9 +24,14 @@ import io.netty.handler.codec.mqtt.MqttMessageType;
 import io.netty.handler.codec.mqtt.MqttPublishMessage;
 import io.netty.handler.codec.mqtt.MqttPublishVariableHeader;
 import io.netty.handler.codec.mqtt.MqttQoS;
-import java.util.List;
-import java.util.Optional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+import org.apache.commons.lang3.StringUtils;
 import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.consumer.DefaultLitePullConsumer;
@@ -40,6 +45,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.apache.rocketmq.common.message.MessageQueue;
 import org.apache.rocketmq.common.protocol.heartbeat.MessageModel;
 import org.apache.rocketmq.iot.common.config.MqttBridgeConfig;
+import org.apache.rocketmq.iot.common.util.MqttUtil;
 import org.apache.rocketmq.iot.connection.client.Client;
 import org.apache.rocketmq.iot.protocol.mqtt.constant.MsgPropertyKeyConstant;
 import org.apache.rocketmq.iot.protocol.mqtt.data.Subscription;
@@ -57,6 +63,7 @@ public class ConsumerPullTask implements Runnable {
     private boolean isRunning;
     private DefaultMQPullConsumer pullConsumer;
     private SubscriptionStore subscriptionStore;
+    private Map<String, AtomicInteger> concernedTenants = new ConcurrentHashMap<>();
 
     public ConsumerPullTask(MqttBridgeConfig bridgeConfig, MessageQueue messageQueue,
                             TopicOffset topicOffset, SubscriptionStore subscriptionStore) {
@@ -114,9 +121,6 @@ public class ConsumerPullTask implements Runnable {
 
     private void sendSubscriptionClient(List<MessageExt> messageExtList) {
         for (MessageExt messageExt : messageExtList) {
-            //TODO:
-            // 从这里的代码可以看出，当前这个代理不适合用于生产环境下的 异构生产者发送数据。暂时先使之可以以极简方式下发。
-            // 但需要注意的是：1. 不能发送太大的包;（没有拆包处理） 2. 暂时还没有Qos > 0的支持（需要 packet id. 为此需要添加对每client的packet 维护工作）
             boolean isDup = Boolean.parseBoolean(Optional.ofNullable(messageExt.getUserProperty(MsgPropertyKeyConstant.MSG_IS_DUP)).orElse("false"));
             MqttQoS qosLevel = MqttQoS.valueOf(Integer.parseInt(Optional.ofNullable(messageExt.getUserProperty(MsgPropertyKeyConstant.MSG_QOS_LEVEL)).orElse("0")));
             boolean isRetain = Boolean.parseBoolean(Optional.ofNullable(messageExt.getUserProperty(MsgPropertyKeyConstant.MSG_IS_RETAIN)).orElse("false"));
@@ -124,7 +128,7 @@ public class ConsumerPullTask implements Runnable {
             int remainingLength = Integer.parseInt(Optional.ofNullable(messageExt.getUserProperty(MsgPropertyKeyConstant.MSG_REMAINING_LENGTH)).orElse("0"));
             int packetId = Integer.parseInt(Optional.ofNullable(messageExt.getUserProperty(MsgPropertyKeyConstant.MSG_PACKET_ID)).orElse("1"));
 
-            String mqttTopic = Optional.ofNullable(messageExt.getUserProperty(MsgPropertyKeyConstant.MQTT_TOPIC)).orElse(messageExt.getTopic());
+            String mqttTopic = Optional.ofNullable(messageExt.getUserProperty(MsgPropertyKeyConstant.MQTT_TOPIC)).orElse(MqttUtil.constructMqttTopic(messageExt));
 
             byte[] body = messageExt.getBody();
 

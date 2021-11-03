@@ -36,6 +36,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class MqttSubscribeMessageHandler implements MessageHandler {
+    private static final int SUBACK_FAILURE = 0x80;
+
     private Logger logger = LoggerFactory.getLogger(MqttSubscribeMessageHandler.class);
 
     private SubscriptionStore subscriptionStore;
@@ -65,22 +67,25 @@ public class MqttSubscribeMessageHandler implements MessageHandler {
         String clientId = client.getId();
         MqttSubscribeMessage subscribeMessage = (MqttSubscribeMessage) message.getPayload();
         List<MqttTopicSubscription> topicSubscriptions = subscribeMessage.payload().topicSubscriptions();
-        List<Integer> grantQoss = new ArrayList<>();
+        List<Integer> grantQos = new ArrayList<>();
         topicSubscriptions.forEach(topicSubscription -> {
             String mqttTopic = topicSubscription.topicName();
             int actualQos = MessageUtil.actualQos(topicSubscription.qualityOfService().value());
-            grantQoss.add(actualQos);
-            Subscription subscription = Subscription.Builder.newBuilder()
-                    .client((MqttClient) client).qos(actualQos).build();
-            if (subscribeConsumer != null) {
-                subscribeConsumer.subscribe(mqttTopic, subscription);
-            } else {
-                subscriptionStore.append(mqttTopic, subscription);
+            try {
+                Subscription subscription = Subscription.Builder.newBuilder().client((MqttClient) client).qos(actualQos).build();
+                if (subscribeConsumer != null) {
+                    subscribeConsumer.subscribe(mqttTopic, subscription);
+                } else {
+                    subscriptionStore.append(mqttTopic, subscription);
+                }
+                logger.debug("client[{}] subscribe mqtt topic [{}] success", clientId, mqttTopic);
+                grantQos.add(actualQos);
+            } catch (RuntimeException re) {
+                grantQos.add(SUBACK_FAILURE);
             }
-            logger.debug("client[{}] subscribe mqtt topic [{}] success", clientId, mqttTopic);
         });
 
-        MqttSubAckMessage subackMessage = MessageUtil.getMqttSubackMessage(subscribeMessage, new MqttSubAckPayload(grantQoss));
+        MqttSubAckMessage subackMessage = MessageUtil.getMqttSubackMessage(subscribeMessage, new MqttSubAckPayload(grantQos));
         client.getCtx().writeAndFlush(subackMessage);
     }
 }

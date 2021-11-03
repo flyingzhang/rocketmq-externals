@@ -29,6 +29,7 @@ import org.apache.rocketmq.iot.common.util.HttpAPIClient;
 import org.apache.rocketmq.iot.common.util.MqttUtil;
 import org.apache.rocketmq.iot.connection.client.ClientManager;
 import org.apache.rocketmq.iot.protocol.mqtt.data.Subscription;
+import org.apache.rocketmq.iot.protocol.rocketmq.RmqSubscription;
 import org.apache.rocketmq.iot.rest.common.Connection;
 import org.apache.rocketmq.iot.rest.common.ConnectionInfo;
 import org.apache.rocketmq.iot.rest.common.ContextResponse;
@@ -186,7 +187,9 @@ public class HttpRestHandlerImp implements HttpRestHandler {
         connection.setIp(inetSocketAddress.getAddress().getHostAddress());
         connection.setPort(inetSocketAddress.getPort());
         connection.setNum(1);
-        connection.setRmqTopic(MqttUtil.getRootTopic(mqttTopic));
+        RmqSubscription rmqSubscription = MqttUtil.getRmqSubscription(mqttTopic);
+        connection.setRmqTopic(rmqSubscription.getTopic());
+        connection.setRmqSelector(rmqSubscription.getSelector());
         connection.setMqttTopic(mqttTopic);
         connection.setClientId(subscription.getClient().getId());
         return connection;

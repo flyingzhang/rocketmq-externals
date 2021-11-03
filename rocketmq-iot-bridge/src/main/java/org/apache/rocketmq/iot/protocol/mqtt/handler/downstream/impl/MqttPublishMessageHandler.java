@@ -54,7 +54,6 @@ public class MqttPublishMessageHandler implements MessageHandler {
 
         // TODO: qos1, qos2
         // messageStore.put(message);
-
         ChannelHandlerContext clientCtx = client.getCtx();
         MqttQoS mqttQoS = publishMessage.fixedHeader().qosLevel();
         switch (mqttQoS) {

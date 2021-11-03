@@ -25,11 +25,13 @@ import org.apache.rocketmq.acl.common.AclClientRPCHook;
 import org.apache.rocketmq.acl.common.SessionCredentials;
 import org.apache.rocketmq.client.exception.MQClientException;
 import org.apache.rocketmq.client.producer.DefaultMQProducer;
+import org.apache.rocketmq.common.filter.ExpressionType;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.iot.common.config.MqttBridgeConfig;
 import org.apache.rocketmq.iot.common.util.MqttUtil;
 import org.apache.rocketmq.iot.connection.client.Client;
 import org.apache.rocketmq.iot.protocol.mqtt.constant.MsgPropertyKeyConstant;
+import org.apache.rocketmq.iot.protocol.rocketmq.RmqSubscription;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,7 +73,8 @@ public class RocketMQPublishProducer implements PublishProducer {
 
         MqttPublishVariableHeader variableHeader = publishMessage.variableHeader();
         String mqttTopic = variableHeader.topicName();
-        String rmqTopic = MqttUtil.getRootTopic(mqttTopic);
+        RmqSubscription rmqSubscription = MqttUtil.getRmqSubscription(mqttTopic);
+        String rmqTopic = rmqSubscription.getTopic();
         int packetId = variableHeader.packetId();
 
         Message rmqMessage = new Message(rmqTopic, getMessageBytes(publishMessage));
@@ -79,6 +82,9 @@ public class RocketMQPublishProducer implements PublishProducer {
         rmqMessage.putUserProperty(MsgPropertyKeyConstant.MSG_PACKET_ID, String.valueOf(packetId));
         rmqMessage.putUserProperty(MsgPropertyKeyConstant.CLIENT_ID, clientId);
         rmqMessage.putUserProperty(MsgPropertyKeyConstant.MQTT_TOPIC, mqttTopic);
+        if (ExpressionType.TAG.equals(rmqSubscription.getSelectorType())) {
+            rmqMessage.setTags(rmqSubscription.getSelector());
+        }
         putMqttFixedHeader(rmqMessage, publishMessage.fixedHeader());
 
         this.producer.send(rmqMessage);

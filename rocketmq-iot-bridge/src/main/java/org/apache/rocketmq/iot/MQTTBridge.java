@@ -83,7 +83,7 @@ public class MQTTBridge {
     private void  init() {
         try {
             Properties properties = new Properties();
-            properties.load(MQTTBridge.class.getResourceAsStream("application.properties"));
+            properties.load(MQTTBridge.class.getResourceAsStream("/application.properties"));
             this.bridgeConfig = new MqttBridgeConfig(properties);
         } catch (IOException ioe) {
             this.bridgeConfig = new MqttBridgeConfig();
@@ -118,7 +118,6 @@ public class MQTTBridge {
                     pipeline.addLast("connection-manager", connectionHandler);
                 }
             });
-
     }
 
     private void registerMessageHandlers() {

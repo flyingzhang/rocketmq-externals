@@ -26,6 +26,7 @@ import org.apache.rocketmq.iot.common.config.MqttBridgeConfig;
 import org.apache.rocketmq.iot.common.util.MqttUtil;
 import org.apache.rocketmq.iot.connection.client.Client;
 import org.apache.rocketmq.iot.protocol.mqtt.data.Subscription;
+import org.apache.rocketmq.iot.protocol.rocketmq.RmqSubscription;
 import org.apache.rocketmq.iot.storage.subscription.SubscriptionStore;
 import org.apache.rocketmq.remoting.RPCHook;
 import org.apache.rocketmq.tools.admin.DefaultMQAdminExt;
@@ -78,7 +79,8 @@ public class RocketMQSubscribeConsumer implements SubscribeConsumer {
 
     @Override
     public void subscribe(String mqttTopic, Subscription subscription) {
-        String rmqTopic = MqttUtil.getRootTopic(mqttTopic);
+        RmqSubscription rmqSubscription = MqttUtil.getRmqSubscription(mqttTopic);
+        String rmqTopic = rmqSubscription.getTopic();
         Map<MessageQueue, TopicOffset> queueOffsetTable;
         try {
             queueOffsetTable = mqAdminExt.examineTopicStats(rmqTopic).getOffsetTable();
@@ -87,7 +89,7 @@ public class RocketMQSubscribeConsumer implements SubscribeConsumer {
             }
         } catch (Exception e) {
             logger.error("examine rmqTopic[{}] offsetTable error.", rmqTopic, e);
-            return;
+            throw new RuntimeException("Subsribe from RocketMQ Failed", e);
         }
 
         synchronized (subscriptionStore) {
@@ -114,7 +116,8 @@ public class RocketMQSubscribeConsumer implements SubscribeConsumer {
         subscriptionStore.remove(mqttTopic, client);
         logger.info("client[{}] unsubscribe mqttTopic[{}] success.", client.getId(), mqttTopic);
 
-        String rmqTopic = MqttUtil.getRootTopic(mqttTopic);
+        RmqSubscription rmqSubscription = MqttUtil.getRmqSubscription(mqttTopic);
+        String rmqTopic = rmqSubscription.getTopic();
         Map<MessageQueue, TopicOffset> queueOffsetTable;
         try {
             queueOffsetTable = mqAdminExt.examineTopicStats(rmqTopic).getOffsetTable();
