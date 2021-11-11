@@ -66,9 +66,9 @@ public class MqttUtil {
         String tenant = messageExt.getTags();
         String bizTopic = messageExt.getTopic();
         // TODO: split biz key from message.
-        String bizKey = messageExt.getUserProperty("gh_biz_key");
+        String bizKey = messageExt.getUserProperty("gh-biz-key");
         if (StringUtils.isNotBlank(tenant)) {
-            return String.format("/%s/%s/%s", tenant, bizTopic, bizKey);
+            return String.format("%s/%s/%s", tenant, bizTopic, bizKey);
         } else {
             return messageExt.getTopic();
         }
