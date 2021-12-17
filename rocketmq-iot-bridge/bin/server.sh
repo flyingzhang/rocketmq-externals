@@ -14,16 +14,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+BASEDIR=$(dirname $(realpath $(dirname $(readlink $0))))
+CURDIR=`pwd`
 
-CURDIR=`cd $(dirname $0) && pwd`
-BASEDIR=$(dirname ${CURDIR})
 MAINCLASS=org.apache.rocketmq.iot.MQTTBridge
 VERSION=0.0.1-SNAPSHOT
 JAR=rocketmq-iot-bridge-${VERSION}.jar
 PID_FILE=${CURDIR}/.server.pid
+ENV_FILE=${CURDIR}/.env
 
 _start() {
-    java -cp ${BASEDIR}/target/${JAR} ${MAINCLASS} &
+    if [ -f $ENV_FILE ] ;  then
+        source ${ENV_FILE}
+    fi
+    java  ${JAVA_OPTS} -cp ${CURDIR}/:${BASEDIR}/target/${JAR}:${BASEDIR}/target/lib/* ${IOT_ARGS} ${MAINCLASS} &
     echo $! > ${CURDIR}/.server.pid
     echo "RocketMQ-IoT-Bridge started ..."
 }
